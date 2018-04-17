@@ -1,0 +1,78 @@
+docker :
+
+# List container size
+docker system df
+docker system df -v
+docker ps -s
+
+# Delete all containers
+docker rm -f $(docker ps -a -q)
+# Delete all images
+docker rmi -f $(docker images -q)
+# Delete all volumes
+docker volume rm `docker volume ls -q -f dangling=true`
+
+# Clean up dead and exited containers
+docker ps --filter status=dead --filter status=exited -aq | xargs docker rm -v
+
+https://lebkowski.name/docker-volumes/
+
+
+docker login
+docker build -f dockerfile -t springbootzipkin .
+docker tag springbootzipkin marcinkasinski/springbootzipkin
+docker push marcinkasinski/springbootzipkin
+
+curl -H 'Content-Type: application/json' -XPUT 'http://tools.local:9200/_template/filebeat' -d@filebeat.template.json
+
+docker pull marcinkasinski/springbootzipkin 
+
+docker kill springbootzipkin && docker rm springbootzipkin && cd /root/SpringBootZipkin/docker/ && docker build -f dockerfile -t springbootzipkin . && docker run -d --restart=always --name springbootzipkin -v /usr/src/myapp/logs/:/usr/src/myapp/logs/ -p 7777:7777 springbootzipkin && docker exec -i -t springbootzipkin cat /etc/filebeat/filebeat.yml && docker exec -i -t springbootzipkin tail -f /var/log/filebeat/filebeat
+
+
+docker run -d --name springbootzipkin -p 7777:7777 marcinkasinski/springbootzipkin \
+ && docker logs -f springbootzipkin
+
+
+docker run --name springbootzipkin -p 7777:7777 marcinkasinski/springbootzipkin 
+
+docker start springbootzipkin && docker logs -f springbootzipkin 
+
+podącz sie ssh 
+docker exec -i -t springbootzipkin /bin/bash
+
+docker exec -i -t springbootzipkin tail -f /var/log/filebeat/filebeat
+
+
+
+docker exec -i -t logstash /bin/bash
+docker exec -i -t elk /bin/bash
+
+docker logs -f springbootzipkin
+
+docker port springbootzipkin
+
+
+mvn spring-boot:run
+
+mvn test -Dtest=AppTest,AppTest2
+
+
+docker run --name logstash --rm -it -v /root/11-kafka_input.conf:/usr/share/logstash/pipeline/logstash.conf -e XPACK_MONITORING_ENABLED=false docker.elastic.co/logstash/logstash:5.5.2
+
+
+/usr/hdp/current/kafka-broker/bin/kafka-topics.sh --list --zookeeper hdp1.local:2181,hdp2.local:2181,hdp3.local:2181
+/usr/hdp/current/kafka-broker/bin/kafka-topics.sh --delete --zookeeper hdp1.local:2181,hdp2.local:2181,hdp3.local:2181 --topic logs
+/usr/hdp/current/kafka-broker/bin/kafka-topics.sh --create --zookeeper hdp1.local:2181,hdp2.local:2181,hdp3.local:2181  --replication-factor 1 --partition 1 --topic logs
+
+
+/usr/hdp/current/kafka-broker/bin/kafka-consumer-groups.sh --new-consumer --bootstrap-server hdp1.local:6667,hdp2.local:6667,hdp3.local:6667 --list
+/usr/hdp/current/kafka-broker/bin/kafka-consumer-groups.sh  --list --zookeeper hdp1.local:2181,hdp2.local:2181,hdp3.local:2181
+
+
+/usr/hdp/current/kafka-broker/bin/kafka-consumer-groups.sh  --list --bootstrap-server hdp1.local:6667,hdp2.local:6667,hdp3.local:6667
+
+/usr/hdp/current/kafka-broker/bin/zookeeper-shell.sh hdp1.local:2181,hdp2.local:2181,hdp3.local:2181
+
+
+

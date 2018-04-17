@@ -1,0 +1,7 @@
+logging:
+    file: logs/application.log
+server:
+    port: 7777
+spring:
+    application:
+        name: SpringBootZipkin

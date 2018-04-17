@@ -1,0 +1,85 @@
+FROM openjdk:8
+MAINTAINER Marcin Kasiński <marcin.kasinski@gmail.com> 
+
+
+
+########################################## install Logstash ##########################################
+ENV LOGSTASH_VERSION 5.5.2
+ENV LOGSTASH_HOME /opt/logstash 
+ENV LOGSTASH_PACKAGE logstash-${LOGSTASH_VERSION}.tar.gz 
+ENV LOGSTASH_GID 992 
+ENV LOGSTASH_UID 992 
+RUN mkdir ${LOGSTASH_HOME}
+#RUN curl -O https://artifacts.elastic.co/downloads/logstash/${LOGSTASH_PACKAGE} \
+COPY logstash-5.5.2.tar.gz logstash-5.5.2.tar.gz
+RUN tar xzf ${LOGSTASH_PACKAGE} -C ${LOGSTASH_HOME} --strip-components=1 \
+ && rm -f ${LOGSTASH_PACKAGE} \
+RUN echo ${LOGSTASH_PACKAGE}
+RUN ls -l
+RUN groupadd -r logstash -g ${LOGSTASH_GID} \
+ && useradd -r -s /usr/sbin/nologin -d ${LOGSTASH_HOME} -c "Logstash service user" -u ${LOGSTASH_UID} -g logstash logstash \
+ && mkdir /var/log/logstash \
+ && mkdir /etc/logstash \
+ && mkdir /etc/logstash/conf.d \
+ && chown -R logstash:logstash ${LOGSTASH_HOME} /var/log/logstash /etc/logstash
+ADD logstash-init /etc/init.d/logstash
+RUN sed -i -e 's#^LS_HOME=$#LS_HOME='$LOGSTASH_HOME'#' /etc/init.d/logstash \
+ && chmod +x /etc/init.d/logstash
+
+RUN sed -i -e 's/\r//g' /etc/init.d/logstash
+
+
+########################################## install Logstash ##########################################
+
+
+
+########################################## configure Logstash  ##########################################
+
+
+# certs/keys for Beats and Lumberjack input 
+RUN mkdir -p /etc/pki/tls/certs && mkdir /etc/pki/tls/private
+#ADD ./logstash-beats.crt /etc/pki/tls/certs/logstash-beats.crt
+#ADD ./logstash-beats.key /etc/pki/tls/private/logstash-beats.key
+# filters 
+ADD 11-kafka_output.conf /etc/logstash/conf.d/11-kafka_output.conf
+# patterns 
+#ADD ./nginx.pattern ${LOGSTASH_HOME}/patterns/nginx
+#RUN chown -R logstash:logstash ${LOGSTASH_HOME}/patterns
+
+
+
+########################################## configure Logstash  ##########################################
+
+
+########################################## starting Logstash  ##########################################
+
+
+RUN mkdir /usr/src/myapp
+RUN mkdir /usr/src/myapp/logs
+RUN touch /usr/src/myapp/logs/application.log
+#RUN service logstash start
+RUN /opt/logstash/bin/logstash -f /etc/logstash/conf.d/11-kafka_output.conf &
+########################################## starting Logstash  ##########################################
+
+
+
+
+
+
+
+# install Filebeat
+ENV FILEBEAT_VERSION=filebeat_1.2.3_amd64.deb
+RUN curl -L -O https://download.elastic.co/beats/filebeat/${FILEBEAT_VERSION} \
+ && dpkg -i ${FILEBEAT_VERSION} \
+ && rm ${FILEBEAT_VERSION}
+
+# configure Filebeat
+ADD filebeat.yml /etc/filebeat/filebeat.yml
+
+
+
+
+COPY SpringBootZipkin-0.0.1-SNAPSHOT.jar /usr/src/myapp/SpringBootZipkin-0.0.1-SNAPSHOT.jar
+WORKDIR /usr/src/myapp
+#CMD java -jar SpringBootZipkin-0.0.1-SNAPSHOT.jar
+EXPOSE 7777
