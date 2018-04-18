@@ -29,7 +29,7 @@ ADD filebeatstokafka.yml /etc/filebeat/filebeat.yml
 ADD start.sh /usr/src/myapp/start.sh
 RUN sed -i -e 's/\r//g' /usr/src/myapp/start.sh
 
-COPY SpringBootWeb-0.0.1-SNAPSHOT.jar /usr/src/myapp/SpringBootWeb-0.0.1-SNAPSHOT.jar
+COPY SpringBootZipkin-0.0.1-SNAPSHOT.jar /usr/src/myapp/SpringBootZipkin-0.0.1-SNAPSHOT.jar
 WORKDIR /usr/src/myapp
 #CMD /etc/init.d/filebeat start && java -jar SpringBootWeb-0.0.1-SNAPSHOT.jar
 #CMD ls -l /
